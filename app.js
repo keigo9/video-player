@@ -172,12 +172,20 @@
     clearJumpError();
   }
 
+  /** iPhone / iPad かどうか（iPadOS は Mac として振る舞うのでタッチ対応で判定） */
+  function isIOS() {
+    return /iPhone|iPad|iPod/.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
   function openFilePicker() {
     el.fileInput.value = '';
     el.fileInput.click();
   }
 
   function setupFileInput() {
+    // 写真ライブラリから選ぶと iOS 側の変換で遅くなるため、iOS ではヒントを出す
+    $('iosTip').hidden = !isIOS();
     el.dropZone.addEventListener('click', openFilePicker);
     el.dropZone.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {

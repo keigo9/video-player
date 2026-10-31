@@ -62,6 +62,15 @@ body {
 }
 .drop-zone__main { font-size: 1.15rem; font-weight: 600; margin: 0 0 6px; }
 .drop-zone__sub { color: var(--muted); margin: 0; font-size: 0.9rem; }
+.drop-zone__tip {
+  margin: 16px auto 0;
+  max-width: 32em;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  font-size: 0.85rem;
+  text-align: left;
+}
 
 /* プレイヤー */
 .player__meta {
