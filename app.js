@@ -2,9 +2,9 @@
 
 (() => {
   // ===== 定数 =====
-  const SPEED_PRESETS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 3];
+  const SPEED_PRESETS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 3, 5, 10];
   const SPEED_MIN = 0.25;
-  const SPEED_MAX = 4;
+  const SPEED_MAX = 10;
   const SPEED_STEP = 0.05;
   const SEEK_SHORT = 5;
   const SEEK_LONG = 10;
@@ -33,6 +33,8 @@
     playBtn: $('playBtn'),
     stopBtn: $('stopBtn'),
     back10Btn: $('back10Btn'),
+    back5Btn: $('back5Btn'),
+    fwd5Btn: $('fwd5Btn'),
     fwd10Btn: $('fwd10Btn'),
     muteBtn: $('muteBtn'),
     volumeBar: $('volumeBar'),
@@ -308,9 +310,15 @@
 
   // ===== 再生速度 =====
   function setSpeed(value) {
-    const speed = roundSpeed(clamp(value, SPEED_MIN, SPEED_MAX));
-    el.video.playbackRate = speed;
-    el.video.defaultPlaybackRate = speed;
+    let speed = roundSpeed(clamp(value, SPEED_MIN, SPEED_MAX));
+    try {
+      el.video.playbackRate = speed;
+      el.video.defaultPlaybackRate = speed;
+    } catch {
+      // ブラウザが対応していない速度だと例外になるので、実際に設定できている値に戻す
+      showStatus(`${speed}x はこのブラウザでは使えません。`, true);
+      speed = roundSpeed(el.video.playbackRate);
+    }
     saveNumber(STORAGE_KEY_SPEED, speed);
     updateSpeedDisplay(speed);
     return speed;
@@ -442,6 +450,8 @@
     el.playBtn.addEventListener('click', togglePlay);
     el.stopBtn.addEventListener('click', stop);
     el.back10Btn.addEventListener('click', () => seekBy(-SEEK_LONG));
+    el.back5Btn.addEventListener('click', () => seekBy(-SEEK_SHORT));
+    el.fwd5Btn.addEventListener('click', () => seekBy(SEEK_SHORT));
     el.fwd10Btn.addEventListener('click', () => seekBy(SEEK_LONG));
     el.video.addEventListener('click', togglePlay);
     el.video.addEventListener('dblclick', toggleFullscreen);

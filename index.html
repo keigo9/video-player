@@ -58,8 +58,10 @@
       <!-- 基本操作 -->
       <div class="controls">
         <button id="back10Btn" type="button" class="btn" aria-label="10秒戻る" title="10秒戻る (J)">⏪ 10s</button>
+        <button id="back5Btn" type="button" class="btn" aria-label="5秒戻る" title="5秒戻る (←)">◀ 5s</button>
         <button id="playBtn" type="button" class="btn btn--primary" aria-label="再生" title="再生 / 一時停止 (Space / K)">▶ 再生</button>
         <button id="stopBtn" type="button" class="btn" aria-label="停止して先頭に戻る" title="停止 (S)">⏹ 停止</button>
+        <button id="fwd5Btn" type="button" class="btn" aria-label="5秒進む" title="5秒進む (→)">5s ▶</button>
         <button id="fwd10Btn" type="button" class="btn" aria-label="10秒進む" title="10秒進む (L)">10s ⏩</button>
         <span class="controls__spacer"></span>
         <button id="muteBtn" type="button" class="btn" aria-label="ミュート" title="ミュート (M)">🔊</button>
@@ -74,7 +76,7 @@
           <div id="speedPresets" class="chips" role="group" aria-label="再生速度のプリセット"></div>
           <div class="speed-fine">
             <button id="speedDownBtn" type="button" class="btn btn--small" aria-label="速度を下げる" title="速度ダウン ( [ )">−</button>
-            <input id="speedBar" type="range" min="0.25" max="4" step="0.05" value="1" aria-label="再生速度の微調整">
+            <input id="speedBar" type="range" min="0.25" max="10" step="0.05" value="1" aria-label="再生速度の微調整">
             <button id="speedUpBtn" type="button" class="btn btn--small" aria-label="速度を上げる" title="速度アップ ( ] )">＋</button>
           </div>
         </section>
