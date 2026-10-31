@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+    セキュリティ設定：
+    - 外部への通信を一切許可しない（connect-src 'none'）
+    - スクリプト・スタイルは同一オリジンのファイルのみ（インライン禁止）
+    - 動画はローカルファイルから作った blob: URL のみ再生可能
+  -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src blob:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>シンプル動画プレイヤー</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <header class="app-header">
+    <h1>シンプル動画プレイヤー</h1>
+    <p class="privacy-note">🔒 動画はあなたのブラウザ内だけで再生されます。どこにもアップロードされません。</p>
+  </header>
+
+  <main class="app">
+    <!-- ファイル選択エリア -->
+    <section id="dropZone" class="drop-zone" tabindex="0" role="button"
+             aria-label="動画ファイルを選択。クリックするか、ここにファイルをドロップしてください">
+      <p class="drop-zone__main">🎬 ここに動画をドラッグ＆ドロップ</p>
+      <p class="drop-zone__sub">またはクリックしてファイルを選択（MP4 / WebM / MOV など）</p>
+      <input id="fileInput" type="file" accept="video/*" hidden>
+    </section>
+
+    <!-- プレイヤー本体 -->
+    <section id="player" class="player" hidden>
+      <div class="player__meta">
+        <span id="fileName" class="player__filename"></span>
+        <button id="changeFileBtn" type="button" class="btn btn--ghost">別の動画を開く</button>
+      </div>
+
+      <div id="videoWrap" class="video-wrap">
+        <video id="video" playsinline preload="metadata"></video>
+        <div id="osd" class="osd" aria-hidden="true"></div>
+      </div>
+
+      <!-- シークバーと時間表示 -->
+      <div class="seek">
+        <span id="currentTime" class="time">0:00</span>
+        <input id="seekBar" class="seek__bar" type="range" min="0" max="0" step="0.01" value="0"
+               aria-label="再生位置">
+        <span id="duration" class="time">0:00</span>
+      </div>
+
+      <!-- 基本操作 -->
+      <div class="controls">
+        <button id="back10Btn" type="button" class="btn" aria-label="10秒戻る" title="10秒戻る (J)">⏪ 10s</button>
+        <button id="playBtn" type="button" class="btn btn--primary" aria-label="再生" title="再生 / 一時停止 (Space / K)">▶ 再生</button>
+        <button id="stopBtn" type="button" class="btn" aria-label="停止して先頭に戻る" title="停止 (S)">⏹ 停止</button>
+        <button id="fwd10Btn" type="button" class="btn" aria-label="10秒進む" title="10秒進む (L)">10s ⏩</button>
+        <span class="controls__spacer"></span>
+        <button id="muteBtn" type="button" class="btn" aria-label="ミュート" title="ミュート (M)">🔊</button>
+        <input id="volumeBar" type="range" min="0" max="1" step="0.05" value="1" aria-label="音量" class="volume">
+        <button id="fullscreenBtn" type="button" class="btn" aria-label="全画面表示" title="全画面 (F)">⛶</button>
+      </div>
+
+      <div class="panels">
+        <!-- 再生速度 -->
+        <section class="panel" aria-labelledby="speedTitle">
+          <h2 id="speedTitle" class="panel__title">再生速度 <output id="speedValue" class="badge">1.00x</output></h2>
+          <div id="speedPresets" class="chips" role="group" aria-label="再生速度のプリセット"></div>
+          <div class="speed-fine">
+            <button id="speedDownBtn" type="button" class="btn btn--small" aria-label="速度を下げる" title="速度ダウン ( [ )">−</button>
+            <input id="speedBar" type="range" min="0.25" max="4" step="0.05" value="1" aria-label="再生速度の微調整">
+            <button id="speedUpBtn" type="button" class="btn btn--small" aria-label="速度を上げる" title="速度アップ ( ] )">＋</button>
+          </div>
+        </section>
+
+        <!-- 時間指定再生 -->
+        <section class="panel" aria-labelledby="jumpTitle">
+          <h2 id="jumpTitle" class="panel__title">時間を指定して再生</h2>
+          <form id="jumpForm" class="jump" autocomplete="off" novalidate>
+            <input id="jumpInput" type="text" inputmode="numeric" maxlength="12"
+                   placeholder="例: 1:30 / 90 / 1:02:03" aria-describedby="jumpHelp" aria-label="再生開始時間">
+            <button type="submit" class="btn btn--primary">ここから再生</button>
+            <button id="useCurrentBtn" type="button" class="btn btn--ghost" title="今の再生位置を入力欄に入れる">現在位置</button>
+          </form>
+          <p id="jumpHelp" class="hint">「秒」「分:秒」「時:分:秒」の形式で入力できます</p>
+          <p id="jumpError" class="error" role="alert"></p>
+        </section>
+      </div>
+
+      <details class="shortcuts">
+        <summary>⌨ キーボードショートカット</summary>
+        <dl>
+          <dt>Space / K</dt><dd>再生 / 一時停止</dd>
+          <dt>S</dt><dd>停止（先頭へ）</dd>
+          <dt>← / →</dt><dd>5秒戻る / 進む</dd>
+          <dt>J / L</dt><dd>10秒戻る / 進む</dd>
+          <dt>, / .</dt><dd>一時停止中にコマ送り（戻る / 進む）</dd>
+          <dt>[ / ]</dt><dd>速度ダウン / アップ</dd>
+          <dt>0</dt><dd>速度を 1.0x に戻す</dd>
+          <dt>↑ / ↓</dt><dd>音量アップ / ダウン</dd>
+          <dt>M</dt><dd>ミュート</dd>
+          <dt>F</dt><dd>全画面</dd>
+          <dt>G</dt><dd>時間指定の入力欄へ移動</dd>
+        </dl>
+      </details>
+    </section>
+
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
